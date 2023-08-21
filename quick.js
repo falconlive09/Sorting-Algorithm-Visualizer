@@ -1,98 +1,70 @@
-async function merge(ele, low, mid, high) {
-    const n1 = mid - low + 1;
-    const n2 = high - mid;
-    let left = new Array(n1);
-    let right = new Array(n2);
-
-    for (let i = 0; i < n1; i++) {
-        await waitforme(delay);
-        ele[low + i].style.background = 'orange';
-        left[i] = ele[low + i].style.height;
+async function quickSort(ele, l, r) {
+    if (l < r) {
+        let pivotIndex = await partition(ele, l, r);
+        await quickSort(ele, l, pivotIndex - 1);
+        await quickSort(ele, pivotIndex + 1, r);
     }
-    for (let i = 0; i < n2; i++) {
-        await waitforme(delay);
-        ele[mid + 1 + i].style.background = 'yellow';
-        right[i] = ele[mid + 1 + i].style.height;
-    }
-    await waitforme(delay);
-    let i = 0, j = 0, k = low;
-    while (i < n1 && j < n2) {
-        await waitforme(delay);
-        if (parseInt(left[i]) <= parseInt(right[j])) {
-            console.log('In merge while loop if');
-            if ((n1 + n2) === ele.length) {
-                ele[k].style.background = 'green';
-            }
-            else {
-                ele[k].style.background = 'lightgreen';
-            }
+}
 
-            ele[k].style.height = left[i];
+async function partition(ele, l, r) {
+    let pivot = parseInt(ele[r].style.height);
+    let i = l - 1;
+
+    ele[r].style.background = 'orange';
+
+    for (let j = l; j <= r - 1; j++) {
+        ele[j].style.background = 'red';
+        await waitforme(delay);
+
+        let jHeight = parseInt(ele[j].style.height);
+
+        if (jHeight < pivot) {
             i++;
-            k++;
-        }
-        else {
-            if ((n1 + n2) === ele.length) {
-                ele[k].style.background = 'green';
-            }
-            else {
-                ele[k].style.background = 'lightgreen';
-            }
-            ele[k].style.height = right[j];
-            j++;
-            k++;
+            ele[i].style.background = 'yellow';
+            ele[j].style.background = 'yellow';
+            await swap(ele[i], ele[j]);
+            await waitforme(delay);
+            ele[i].style.background = 'blue';
+            ele[j].style.background = 'blue';
+        } else {
+            ele[j].style.background = 'blue';
         }
     }
-    while (i < n1) {
-        await waitforme(delay);
-        if ((n1 + n2) === ele.length) {
-            ele[k].style.background = 'green';
-        }
-        else {
-            ele[k].style.background = 'lightgreen';
-        }
-        ele[k].style.height = left[i];
-        i++;
-        k++;
-    }
-    while (j < n2) {
-        await waitforme(delay);
-        console.log("In while if n2 is left");
-        if ((n1 + n2) === ele.length) {
-            ele[k].style.background = 'green';
-        }
-        else {
-            ele[k].style.background = 'lightgreen';
-        }
-        ele[k].style.height = right[j];
-        j++;
-        k++;
-    }
+
+    await swap(ele[i + 1], ele[r]);
+    ele[r].style.background = 'blue';
+    ele[i + 1].style.background = 'green';
+    await waitforme(delay);
+
+    return i + 1;
 }
 
-async function mergeSort(ele, l, r) {
-    console.log('In mergeSort()');
-    if (l >= r) {
-        console.log(`return cause just 1 elemment l=${l}, r=${r}`);
-        return;
-    }
-    const m = l + Math.floor((r - l) / 2);
-    console.log(`left=${l} mid=${m} right=${r}`, typeof (m));
-    await mergeSort(ele, l, m);
-    await mergeSort(ele, m + 1, r);
-    await merge(ele, l, m, r);
-}
-
-const mergeSortbtn = document.querySelector(".mergeSort");
-mergeSortbtn.addEventListener('click', async function () {
-    let ele = document.querySelectorAll('.bar');
-    let l = 0;
-    let r = parseInt(ele.length) - 1;
+document.querySelector(".quickSort").addEventListener('click', async function () {
     disableSortingBtn();
     disableSizeSlider();
     disableNewArrayBtn();
-    await mergeSort(ele, l, r);
+
+    let ele = document.querySelectorAll('.bar');
+    let l = 0;
+    let r = ele.length - 1;
+    await quickSort(ele, l, r);
+
+    // Turn all bars green after sorting
+    for (let k = 0; k < ele.length; k++) {
+        ele[k].style.background = 'green';
+    }
+
     enableSortingBtn();
     enableSizeSlider();
     enableNewArrayBtn();
 });
+
+function waitforme(milisec) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve();
+        }, milisec);
+    });
+}
+
+// ... (rest of your code remains the same)
